@@ -1,0 +1,269 @@
+title Inverge
+author metagameface
+homepage www.puzzlescript.net
+
+========
+OBJECTS
+========
+
+BlackBackground
+BLACK
+
+WhiteBackground
+WHITE
+
+WallBackground (needed so that it's not treated like white/black background)
+BROWN
+
+Wall 
+BROWN
+
+Goal
+RED
+0...0
+.0.0.
+..0..
+.0.0.
+0...0
+
+
+BlackPlayer
+BLACK LIGHTGREEN
+.000.
+.010.
+00100
+.000.
+.0.0.
+
+SBlackPlayer
+BLACK DARKGREEN
+.000.
+.010.
+.010.
+.000.
+.0.0.
+
+WhitePlayer 
+WHITE LIGHTGREEN
+.000.
+.010.
+00100
+.000.
+.0.0.
+
+SWhitePlayer
+WHITE DARKGREEN
+.000.
+.010.
+.010.
+.000.
+.0.0.
+
+BlackCrate
+DARKGREY BLACK 
+00000
+01100
+01010
+00110
+00000
+
+WhiteCrate
+LIGHTGRAY WHITE
+00000
+01100
+01010
+00110
+00000
+
+BlackPlayerCrated
+LIGHTGRAY LIGHTGREEN BLACK
+02220
+02120
+22122
+02220
+02020
+
+WhitePlayerCrated
+DARKGREY LIGHTGREEN WHITE
+02220
+02120
+22122
+02220
+02020
+
+SBlackPlayerCrated
+LIGHTGRAY DARKGREEN BLACK
+02220
+02120
+02120
+02220
+02020
+
+SWhitePlayerCrated
+DARKGREY DARKGREEN WHITE
+02220
+02120
+02120
+02220
+02020
+
+=======
+LEGEND
+=======
+
+Player = BlackPlayer or WhitePlayer or BlackPlayerCrated or WhitePlayerCrated
+SPlayer = SBlackPlayer or SWhitePlayer or SBlackPlayerCrated or SWhitePlayerCrated
+Background = BlackBackground or WhiteBackground or WallBackground
+Crate = BlackCrate or WhiteCrate or BlackPlayerCrated or WhitePlayerCrated or SBlackPlayerCrated or SWhitePlayerCrated
+
+BlackMovable = BlackCrate or SWhitePlayerCrated
+WhiteMovable = WhiteCrate or SBlackPlayerCrated
+
+
+0 = WhiteBackground
+1 = BlackBackground
+# = Wall and WallBackground
+B = BlackPlayer and WhiteBackground
+W = SWhitePlayer and BlackBackground
++ = BlackCrate and WhiteBackground
+- = WhiteCrate and BlackBackground
+X = Goal and WhiteBackground
+Y = Goal and BlackBackground
+
+
+=======
+SOUNDS
+=======
+
+================
+COLLISIONLAYERS
+================
+
+Background
+Goal
+Wall, Crate, Player, SPlayer
+
+======
+RULES     
+======
+
+(Swap active player)
+[Action BlackPlayer] [SWhitePlayer] -> [SBlackPlayer] [WhitePlayer]
+[Action BlackPlayer] [SWhitePlayerCrated] -> [SBlackPlayer] [WhitePlayerCrated]
+[Action BlackPlayerCrated] [SWhitePlayer] -> [SBlackPlayerCrated] [WhitePlayer]
+[Action BlackPlayerCrated] [SWhitePlayerCrated] -> [SBlackPlayerCrated] [WhitePlayerCrated]
+[Action WhitePlayer] [SBlackPlayer] -> [SWhitePlayer] [BlackPlayer]
+[Action WhitePlayer] [SBlackPlayerCrated] -> [SWhitePlayer] [BlackPlayerCrated]
+[Action WhitePlayerCrated] [SBlackPlayer] -> [SWhitePlayerCrated] [BlackPlayer]
+[Action WhitePlayerCrated] [SBlackPlayerCrated] -> [SWhitePlayerCrated] [BlackPlayerCrated]
+
+(Push crates of your colour, with or without the other player in them)
+[> BlackPlayer | BlackMovable] -> [> BlackPlayer | > BlackMovable]
+[> WhitePlayer | WhiteMovable] -> [> WhitePlayer | > WhiteMovable]
+
+(Enter crates of the opposite colour)
+[> BlackPlayer | WhiteCrate ] -> [ | BlackPlayerCrated]
+[> WhitePlayer | BlackCrate ] -> [ | WhitePlayerCrated]
+
+(Move from a crate of the opposite colour into another crate of that colour)
+[> BlackPlayerCrated | WhiteCrate] -> [ WhiteCrate | BlackPlayerCrated]
+[> WhitePlayerCrated | BlackCrate] -> [ BlackCrate | WhitePlayerCrated]
+
+(Exit crates onto empty space of opposite colour)
+[> BlackPlayerCrated | WhiteBackground No Crate] -> [ WhiteCrate | BlackPlayer WhiteBackground]
+[> WhitePlayerCrated | BlackBackground No Crate] -> [ BlackCrate | WhitePlayer BlackBackground]
+
+(Push a crate of your colour while exiting a crate of the opposite colour)
+[> BlackPlayerCrated | BlackCrate | WhiteBackground No Crate] -> [WhiteCrate | BlackPlayer WhiteBackground | BlackCrate WhiteBackground]
+[> WhitePlayerCrated | WhiteCrate | BlackBackground No Crate] -> [BlackCrate | WhitePlayer BlackBackground | WhiteCrate BlackBackground]
+
+(Players and crates of one colour can't move onto a background of the opposite colour)
+[> BlackPlayer | BlackBackground] -> [BlackPlayer | BlackBackground]
+[> WhitePlayer | WhiteBackground] -> [WhitePlayer | WhiteBackground]
+
+[> BlackMovable | BlackBackground] -> [BlackMovable | BlackBackground]
+[> WhiteMovable | WhiteBackground] -> [WhiteMovable | WhiteBackground]
+
+[> BlackPlayerCrated | BlackBackground] -> [BlackPlayerCrated | BlackBackground]
+[> WhitePlayerCrated | WhiteBackground] -> [WhitePlayerCrated | WhiteBackground]
+
+==============
+WINCONDITIONS
+==============
+
+All Player On Goal
+All SPlayer On Goal
+
+=======     
+LEVELS
+=======
+
+########
+#000111#
+#0b01w1#
+#000111#
+#00011x#
+#0y1110#
+#000000#
+########
+
+########
+#b+01w1#
+#101111#
+#0+11--#
+#0001--#
+#1+11-1#
+#0011-y#
+#x011-1#
+########
+
+#######
+#B0W00#
+#00100#
+#0+000#
+#00100#
+#11111#
+#1-100#
+#Y110X#
+#######
+
+##########
+#####1111#
+#111-11-1#
+#11111##1#
+#10001##1#
+#100+1##1#
+#b0000001#
+#11101001#
+#1yx0w001#
+##########
+
+#############
+#B0000001Y0X#
+#00000001100#
+#0+000001100#
+#011001111-1#
+#01W00111111#
+#############
+
+##########
+######111#
+#111111-1#
+#11111##1#
+#10001##1#
+#100+1001#
+#b0000001#
+#11101101#
+#1yx0w101#
+##########
+
+##########
+#####1111#
+#111111-1#
+#111111#1#
+#100011#1#
+#100+1##1#
+#b0000001#
+#11101101#
+#1yx0w101#
+##########
