@@ -6,14 +6,11 @@ homepage www.puzzlescript.net
 OBJECTS
 ========
 
-BlackBackground
+BackgroundB
 BLACK
 
-WhiteBackground
+BackgroundW
 WHITE
-
-WallBackground (needed so that it's not treated like white/black background)
-BROWN
 
 Wall 
 BROWN
@@ -27,7 +24,7 @@ RED
 0...0
 
 
-BlackPlayer
+PlayerB
 BLACK LIGHTGREEN
 .000.
 .010.
@@ -35,7 +32,7 @@ BLACK LIGHTGREEN
 .000.
 .0.0.
 
-SBlackPlayer
+InactivePlayerB
 BLACK DARKGREEN
 .000.
 .010.
@@ -43,7 +40,7 @@ BLACK DARKGREEN
 .000.
 .0.0.
 
-WhitePlayer 
+PlayerW
 WHITE LIGHTGREEN
 .000.
 .010.
@@ -51,7 +48,7 @@ WHITE LIGHTGREEN
 .000.
 .0.0.
 
-SWhitePlayer
+InactivePlayerW
 WHITE DARKGREEN
 .000.
 .010.
@@ -59,7 +56,7 @@ WHITE DARKGREEN
 .000.
 .0.0.
 
-BlackCrate
+CrateB
 DARKGREY BLACK 
 00000
 01100
@@ -67,7 +64,7 @@ DARKGREY BLACK
 00110
 00000
 
-WhiteCrate
+CrateW
 LIGHTGRAY WHITE
 00000
 01100
@@ -75,60 +72,27 @@ LIGHTGRAY WHITE
 00110
 00000
 
-BlackPlayerCrated
-LIGHTGRAY LIGHTGREEN BLACK
-02220
-02120
-22122
-02220
-02020
-
-WhitePlayerCrated
-DARKGREY LIGHTGREEN WHITE
-02220
-02120
-22122
-02220
-02020
-
-SBlackPlayerCrated
-LIGHTGRAY DARKGREEN BLACK
-02220
-02120
-02120
-02220
-02020
-
-SWhitePlayerCrated
-DARKGREY DARKGREEN WHITE
-02220
-02120
-02120
-02220
-02020
-
 =======
 LEGEND
 =======
 
-Player = BlackPlayer or WhitePlayer or BlackPlayerCrated or WhitePlayerCrated
-SPlayer = SBlackPlayer or SWhitePlayer or SBlackPlayerCrated or SWhitePlayerCrated
-Background = BlackBackground or WhiteBackground or WallBackground
-Crate = BlackCrate or WhiteCrate or BlackPlayerCrated or WhitePlayerCrated or SBlackPlayerCrated or SWhitePlayerCrated
+Player = PlayerB or PlayerW
+InactivePlayer = InactivePlayerB or InactivePlayerW
+Background = BackgroundB or BackgroundW or Wall
+Crate = CrateB or CrateW
+AnyPlayerB = PlayerB or InactivePlayerB
+AnyPlayerW = PlayerB or InactivePlayerW
+AnyPlayer = AnyPlayerB or AnyPlayerW
 
-BlackMovable = BlackCrate or SWhitePlayerCrated
-WhiteMovable = WhiteCrate or SBlackPlayerCrated
-
-
-0 = WhiteBackground
-1 = BlackBackground
-# = Wall and WallBackground
-B = BlackPlayer and WhiteBackground
-W = SWhitePlayer and BlackBackground
-+ = BlackCrate and WhiteBackground
-- = WhiteCrate and BlackBackground
-X = Goal and WhiteBackground
-Y = Goal and BlackBackground
+0 = BackgroundW
+1 = BackgroundB
+# = Wall
+B = PlayerB and BackgroundW
+W = InactivePlayerW and BackgroundB
++ = CrateB and BackgroundW
+- = CrateW and BackgroundB
+X = Goal and BackgroundW
+Y = Goal and BackgroundB
 
 
 =======
@@ -141,58 +105,49 @@ COLLISIONLAYERS
 
 Background
 Goal
-Wall, Crate, Player, SPlayer
+Crate
+Player, InactivePlayer
 
 ======
 RULES     
 ======
 
 (Swap active player)
-[Action BlackPlayer] [SWhitePlayer] -> [SBlackPlayer] [WhitePlayer]
-[Action BlackPlayer] [SWhitePlayerCrated] -> [SBlackPlayer] [WhitePlayerCrated]
-[Action BlackPlayerCrated] [SWhitePlayer] -> [SBlackPlayerCrated] [WhitePlayer]
-[Action BlackPlayerCrated] [SWhitePlayerCrated] -> [SBlackPlayerCrated] [WhitePlayerCrated]
-[Action WhitePlayer] [SBlackPlayer] -> [SWhitePlayer] [BlackPlayer]
-[Action WhitePlayer] [SBlackPlayerCrated] -> [SWhitePlayer] [BlackPlayerCrated]
-[Action WhitePlayerCrated] [SBlackPlayer] -> [SWhitePlayerCrated] [BlackPlayer]
-[Action WhitePlayerCrated] [SBlackPlayerCrated] -> [SWhitePlayerCrated] [BlackPlayerCrated]
+[Action PlayerB] [InactivePlayerW] -> [InactivePlayerB] [PlayerW]
+[Action PlayerW] [InactivePlayerB] -> [InactivePlayerW] [PlayerB]
 
-(Push crates of your colour, with or without the other player in them)
-[> BlackPlayer | BlackMovable] -> [> BlackPlayer | > BlackMovable]
-[> WhitePlayer | WhiteMovable] -> [> WhitePlayer | > WhiteMovable]
+(Players can't move onto a background of the opposite colour unless there is a crate)
+[> PlayerB | BackgroundB no Crate] -> [PlayerB | BackgroundB]
+[> PlayerW | BackgroundW no Crate] -> [PlayerW | BackgroundW]
 
-(Enter crates of the opposite colour)
-[> BlackPlayer | WhiteCrate ] -> [ | BlackPlayerCrated]
-[> WhitePlayer | BlackCrate ] -> [ | WhitePlayerCrated]
+(Push crates of your colour)
+[> PlayerB | CrateB] -> [> PlayerB | > CrateB ]
+[> PlayerW | CrateW] -> [> PlayerW | > CrateW ]
 
-(Move from a crate of the opposite colour into another crate of that colour)
-[> BlackPlayerCrated | WhiteCrate] -> [ WhiteCrate | BlackPlayerCrated]
-[> WhitePlayerCrated | BlackCrate] -> [ BlackCrate | WhitePlayerCrated]
+(Crates can't move onto a background of the opposite colour)
+[> CrateB | BackgroundB] -> [CrateB | BackgroundB]
+[> CrateW | BackgroundW] -> [CrateW | BackgroundW]
 
-(Exit crates onto empty space of opposite colour)
-[> BlackPlayerCrated | WhiteBackground No Crate] -> [ WhiteCrate | BlackPlayer WhiteBackground]
-[> WhitePlayerCrated | BlackBackground No Crate] -> [ BlackCrate | WhitePlayer BlackBackground]
+(Crates can't move into each other)
+[> Crate | Crate] -> [Crate | Crate]
 
-(Push a crate of your colour while exiting a crate of the opposite colour)
-[> BlackPlayerCrated | BlackCrate | WhiteBackground No Crate] -> [WhiteCrate | BlackPlayer WhiteBackground | BlackCrate WhiteBackground]
-[> WhitePlayerCrated | WhiteCrate | BlackBackground No Crate] -> [BlackCrate | WhitePlayer BlackBackground | WhiteCrate BlackBackground]
+(If a player is in a moving crate, they move too)
+[> Crate AnyPlayer] -> [> Crate > AnyPlayer]
 
-(Players and crates of one colour can't move onto a background of the opposite colour)
-[> BlackPlayer | BlackBackground] -> [BlackPlayer | BlackBackground]
-[> WhitePlayer | WhiteBackground] -> [WhitePlayer | WhiteBackground]
+(Players and crates can't move into walls)
+[> Player | Wall] -> [Player | Wall]
+[> Crate | Wall] -> [Crate | Wall]
 
-[> BlackMovable | BlackBackground] -> [BlackMovable | BlackBackground]
-[> WhiteMovable | WhiteBackground] -> [WhiteMovable | WhiteBackground]
-
-[> BlackPlayerCrated | BlackBackground] -> [BlackPlayerCrated | BlackBackground]
-[> WhitePlayerCrated | WhiteBackground] -> [WhitePlayerCrated | WhiteBackground]
+(Players can't move into crates of their own colour)
+[> PlayerB | stationary CrateB] -> [PlayerB | CrateB]
+[> PlayerW | stationary CrateW] -> [PlayerW | CrateW]
 
 ==============
 WINCONDITIONS
 ==============
 
 All Player On Goal
-All SPlayer On Goal
+All InactivePlayer On Goal
 
 =======     
 LEVELS
