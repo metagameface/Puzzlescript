@@ -232,7 +232,7 @@ if I end up using them)
 [> CratePiece AnyPlayer] -> [> CratePiece > AnyPlayer]
 
 (Players and crates can't move into walls)
-[> Player | Wall] -> [Player | Wall]
+[> AnyPlayer | Wall] -> [AnyPlayer | Wall]
 [> CratePiece | Wall] -> [CratePiece | Wall]
 
 (Players can't move into crates of their own colour)
