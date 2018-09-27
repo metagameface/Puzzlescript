@@ -72,6 +72,70 @@ LIGHTGRAY WHITE
 00110
 00000
 
+VertCrateTopB
+DARKGREY BLACK 
+00000
+01100
+01010
+00110
+01110
+
+VertCrateBottomB
+DARKGREY BLACK 
+01110
+01100
+01010
+00110
+00000
+
+VertCrateTopW
+LIGHTGRAY WHITE
+00000
+01100
+01010
+00110
+01110
+
+VertCrateBottomW
+LIGHTGRAY WHITE
+01110
+01100
+01010
+00110
+00000
+
+HorizCrateLeftB
+DARKGREY BLACK 
+00000
+01101
+01011
+00111
+00000
+
+HorizCrateRightB
+DARKGREY BLACK
+00000
+11100
+11010
+10110
+00000
+
+HorizCrateLeftW
+LIGHTGRAY WHITE 
+00000
+01101
+01011
+00111
+00000
+
+HorizCrateRightW
+LIGHTGRAY WHITE
+00000
+11100
+11010
+10110
+00000
+
 =======
 LEGEND
 =======
@@ -83,6 +147,9 @@ Crate = CrateB or CrateW
 AnyPlayerB = PlayerB or InactivePlayerB
 AnyPlayerW = PlayerB or InactivePlayerW
 AnyPlayer = AnyPlayerB or AnyPlayerW
+CratePieceB = CrateB or VertCrateTopB or VertCrateBottomB or HorizCrateLeftB or HorizCrateRightB
+CratePieceW = CrateW or VertCrateTopW or VertCrateBottomW or HorizCrateLeftW or HorizCrateRightW
+CratePiece = CratePieceB or CratePieceW
 
 0 = BackgroundW
 1 = BackgroundB
@@ -93,6 +160,14 @@ W = InactivePlayerW and BackgroundB
 - = CrateW and BackgroundB
 X = Goal and BackgroundW
 Y = Goal and BackgroundB
+p = VertCrateTopB and BackgroundW
+d = VertCrateBottomB and BackgroundW
+n = VertCrateTopW and BackgroundB
+u = VertCrateBottomW and BackgroundB
+{ = HorizCrateLeftB and BackgroundW
+} = HorizCrateRightB and BackgroundW
+6 = HorizCrateLeftW and BackgroundB
+9 = HorizCrateRightW and BackgroundB
 
 
 =======
@@ -105,7 +180,7 @@ COLLISIONLAYERS
 
 Background
 Goal
-Crate
+CratePiece
 Player, InactivePlayer
 
 ======
@@ -117,30 +192,52 @@ RULES
 [Action PlayerW] [InactivePlayerB] -> [InactivePlayerW] [PlayerB]
 
 (Players can't move onto a background of the opposite colour unless there is a crate)
-[> PlayerB | BackgroundB no Crate] -> [PlayerB | BackgroundB]
-[> PlayerW | BackgroundW no Crate] -> [PlayerW | BackgroundW]
+[> PlayerB | BackgroundB no CratePieceW] -> [PlayerB | BackgroundB]
+[> PlayerW | BackgroundW no CratePieceB] -> [PlayerW | BackgroundW]
 
-(Push crates of your colour)
-[> PlayerB | CrateB] -> [> PlayerB | > CrateB ]
-[> PlayerW | CrateW] -> [> PlayerW | > CrateW ]
+(Players can push crates of their colour)
+[> PlayerB | CratePieceB] -> [> PlayerB | > CratePieceB ]
+[> PlayerW | CratePieceW] -> [> PlayerW | > CratePieceW ]
 
-(Crates can't move onto a background of the opposite colour)
-[> CrateB | BackgroundB] -> [CrateB | BackgroundB]
-[> CrateW | BackgroundW] -> [CrateW | BackgroundW]
+(If one half of a 1x2 crate moves, so does the other half
+These don't work properly right now, probably should use rigid body code
+if I end up using them)
+
+[perpendicular VertCrateTopB | VertCrateBottomB] -> [perpendicular VertCrateTopB | perpendicular VertCrateBottomB]
+[perpendicular VertCrateBottomB | VertCrateTopB] -> [perpendicular VertCrateBottomB | perpendicular VertCrateTopB]
+[parallel VertCrateTopB | VertCrateBottomB] -> [parallel VertCrateTopB | parallel VertCrateBottomB]
+[parallel VertCrateBottomB | VertCrateTopB] -> [parallel VertCrateBottomB | parallel VertCrateTopB]
+[perpendicular HorizCrateLeftB | HorizCrateRightB] -> [perpendicular HorizCrateLeftB | perpendicular HorizCrateRightB]
+[perpendicular HorizCrateRightB | HorizCrateLeftB] -> [perpendicular HorizCrateRightB | perpendicular HorizCrateLeftB]
+[parallel HorizCrateLeftB | HorizCrateRightB] -> [parallel HorizCrateLeftB | parallel HorizCrateRightB]
+[parallel HorizCrateRightB | HorizCrateLeftB] -> [parallel HorizCrateRightB | parallel HorizCrateLeftB]
+
+[perpendicular VertCrateTopW | VertCrateBottomW] -> [perpendicular VertCrateTopW | perpendicular VertCrateBottomW]
+[perpendicular VertCrateBottomW | VertCrateTopW] -> [perpendicular VertCrateBottomW | perpendicular VertCrateTopW]
+[parallel VertCrateTopW | VertCrateBottomW] -> [parallel VertCrateTopW | parallel VertCrateBottomW]
+[parallel VertCrateBottomW | VertCrateTopW] -> [parallel VertCrateBottomW | parallel VertCrateTopW]
+[perpendicular HorizCrateLeftW | HorizCrateRightW] -> [perpendicular HorizCrateLeftW | perpendicular HorizCrateRightW]
+[perpendicular HorizCrateRightW | HorizCrateLeftW] -> [perpendicular HorizCrateRightW | perpendicular HorizCrateLeftW]
+[parallel HorizCrateLeftW | HorizCrateRightW] -> [parallel HorizCrateLeftW | parallel HorizCrateRightW]
+[parallel HorizCrateRightW | HorizCrateLeftW] -> [parallel HorizCrateRightW | parallel HorizCrateLeftW]
+
+(Crates can't move onto a background of the same colour)
+[> CratePieceB | BackgroundB] -> [CratePieceB | BackgroundB]
+[> CratePieceW | BackgroundW] -> [CratePieceW | BackgroundW]
 
 (Crates can't move into each other)
-[> Crate | Crate] -> [Crate | Crate]
+[> CratePiece | stationary CratePiece] -> [CratePiece | CratePiece]
 
 (If a player is in a moving crate, they move too)
-[> Crate AnyPlayer] -> [> Crate > AnyPlayer]
+[> CratePiece AnyPlayer] -> [> CratePiece > AnyPlayer]
 
 (Players and crates can't move into walls)
 [> Player | Wall] -> [Player | Wall]
-[> Crate | Wall] -> [Crate | Wall]
+[> CratePiece | Wall] -> [CratePiece | Wall]
 
 (Players can't move into crates of their own colour)
-[> PlayerB | stationary CrateB] -> [PlayerB | CrateB]
-[> PlayerW | stationary CrateW] -> [PlayerW | CrateW]
+[> PlayerB | stationary CratePieceB] -> [PlayerB | CratePieceB]
+[> PlayerW | stationary CratePieceW] -> [PlayerW | CratePieceW]
 
 ==============
 WINCONDITIONS
@@ -190,6 +287,16 @@ LEVELS
 #b0000001#
 #11101000#
 #1yx0w001#
+##########
+
+##########
+#1w11110y#
+#b+0000+0#
+#001-1-11#
+##111110##
+#000+0000#
+#111-1####
+#x001#####
 ##########
 
 #############
